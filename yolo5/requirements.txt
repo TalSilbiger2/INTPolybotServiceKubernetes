@@ -1,3 +1,7 @@
 pyyaml
 loguru
 boto3
+torch
+numpy
+opencv-python
+pymongo
