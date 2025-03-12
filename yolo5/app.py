@@ -29,7 +29,7 @@ mongo_client = MongoClient(mongodb_uri)
 db = mongo_client['yolo5_db']
 predictions_collection = db['predictions']
 
-# Function to consume messages from SQS
+# Method to consume messages from SQS
 def consume():
     while True:
         try:
