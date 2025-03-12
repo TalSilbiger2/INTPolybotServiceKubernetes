@@ -1,121 +1,146 @@
-import flask
-from flask import request
-import os
-import boto3
-import json
-from pymongo import MongoClient
-from bot import ObjectDetectionBot
+import telebot
 from loguru import logger
+import os
+from telebot.types import InputFile
+import requests
+import boto3
+from botocore.exceptions import NoCredentialsError
+import json
+import time
 
+class Bot:
 
-app = flask.Flask(__name__)
+    def __init__(self, token, telegram_chat_url):
+        # create a new instance of the TeleBot class.
+        # all communication with Telegram servers are done using self.telegram_bot_client
+        self.telegram_bot_client = telebot.TeleBot(token)
 
+        # remove any existing webhooks configured in Telegram servers
+        self.telegram_bot_client.remove_webhook()
+        time.sleep(0.5)
 
-def get_secret(secret_name):
-    """ func pull from secret manager"""
+        CERTIFICATE_FILE_NAME = os.environ['CERTIFICATE_FILE_NAME']
+        # set the webhook URL
+        self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60, certificate=open(CERTIFICATE_FILE_NAME, 'r'))
 
-    #  boto3 connect to Secrets Manager
-    session = boto3.session.Session()
-    client = session.client(service_name='secretsmanager', region_name='eu-central-1')
+        logger.info(f'Telegram Bot information\n\n{self.telegram_bot_client.get_me()}')
 
-    try:
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    except Exception as e:
-        raise RuntimeError(f"Failed to retrieve secret {secret_name}: {str(e)}")
+    def send_text(self, chat_id, text):
+        self.telegram_bot_client.send_message(chat_id, text)
 
-    secret = get_secret_value_response['SecretString']
-    return json.loads(secret)
+    def send_text_with_quote(self, chat_id, text, quoted_msg_id):
+        self.telegram_bot_client.send_message(chat_id, text, reply_to_message_id=quoted_msg_id)
 
+    def is_current_msg_photo(self, msg):
+        return 'photo' in msg
 
+    def download_user_photo(self, msg):
+        """ Downloads the photos that sent to the Bot to `photos` directory (should be existed) """
 
-secrets = get_secret("tal-telegram-bot-token") # Load TELEGRAM_TOKEN from secret manager
-TELEGRAM_TOKEN = secrets['TELEGRAM_TOKEN']
-TELEGRAM_APP_URL = os.environ['TELEGRAM_APP_URL']
-S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
-SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
-mongodb_uri = os.environ['MONGODB_URI']
+        if not self.is_current_msg_photo(msg):
+            raise RuntimeError(f'Message content of type \'photo\' expected')
 
+        file_info = self.telegram_bot_client.get_file(msg['photo'][-1]['file_id'])
+        data = self.telegram_bot_client.download_file(file_info.file_path)
+        folder_name = file_info.file_path.split('/')[0]
 
-@app.route('/', methods=['GET'])
-def index():
-    return 'Ok'
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
+        with open(file_info.file_path, 'wb') as photo:
+            photo.write(data)
 
-@app.route(f'/{TELEGRAM_TOKEN}/', methods=['POST'])
-def webhook():
-    req = request.get_json()
-    bot.handle_message(req['message'])
-    return 'Ok'
+        return file_info.file_path
 
+    def send_photo(self, chat_id, img_path):
+        if not os.path.exists(img_path):
+            raise RuntimeError("Image path doesn't exist")
 
-@app.route('/results', methods=['POST'])
-def results():
-    data = request.get_json()
-    prediction_id = data.get('predictionId')
+        self.telegram_bot_client.send_photo(
+            chat_id,
+            InputFile(img_path)
+        )
 
-    if not prediction_id:
-        return "predictionId is missing", 400
+    def handle_message(self, msg):
+        """Bot Main message handler"""
 
+        logger.info(f'Incoming message: {msg}')
+        self.send_text(msg['chat']['id'], f'Your original message: {msg["text"]}')
+class ObjectDetectionBot(Bot):
 
-    logger.info(f"prediction_id is : {prediction_id}") # Using prediction_id to pull the results from MongoDB
-    result = get_prediction_results(prediction_id)
-    logger.info(f"result is : {result}")
-    if not result:
-        return "Prediction not found", 404
+    def __init__(self, token, telegram_chat_url, s3_bucket_name, sqs_queue_url, aws_region="eu-central-1"):
+        super().__init__(token, telegram_chat_url)
+        # Initialize AWS clients
+        self.s3_bucket_name = s3_bucket_name
+        self.sqs_queue_url = sqs_queue_url
+        self.s3_client = boto3.client('s3', region_name=aws_region)
+        self.sqs_client = boto3.client('sqs', region_name=aws_region)
 
-    logger.info(f"result from DB: {result}")
-    if result is None:
-        logger.error(f"No prediction found for ID: {prediction_id}")
-        return "Prediction not found", 404
+    def upload_photo_to_s3(self, file_path):
+        """ Uploads the image to AWS S3 bucket. """
 
-    if 'chat_id' in result:
-        chat_id = result['chat_id']
-    else:
-        logger.error(f"chat_id not found in the result: {result}")
-        return "chat_id not found", 400
+        try:
+            # Upload the file to S3
+            file_name = os.path.basename(file_path)
+            self.s3_client.upload_file(file_path, self.s3_bucket_name, file_name)
+            logger.info(f"File {file_name} uploaded to S3 bucket {self.s3_bucket_name}.")
 
-    logger.info(f"Result: {result}")
-    if 'labels' in result:
-        message = "Prediction Results:\n\n"
+            # Return the S3 URL of the uploaded image
+            return f"https://{self.s3_bucket_name}.s3.amazonaws.com/{file_name}"
+        except FileNotFoundError:
+            logger.error(f"File {file_path} not found.")
+            raise RuntimeError(f"File {file_path} not found.")
+        except NoCredentialsError:
+            logger.error("AWS credentials not found.")
+            raise RuntimeError("AWS credentials not found.")
+        except Exception as e:
+            logger.error(f"An error occurred while uploading to S3: {str(e)}")
+            raise RuntimeError(f"An error occurred while uploading to S3: {str(e)}")
 
-        for label in result['labels']: # Process the image objects
-            message += f"Object: {label['class']}\n"
-            message += f"Coordinates: cx={label['cx']}, cy={label['cy']}, width={label['width']}, height={label['height']}\n\n"
-    else:
-        message = "No objects found in the image."
+    def send_job_to_sqs(self, s3_url, chat_id):
+        """ Sends a job to the SQS queue containing the S3 URL of the uploaded photo for processing."""
 
-    bot.send_text(chat_id, message) # Return the result to the user
-    return 'Ok'
+        try:
+            # Prepare the job message
+            message = {
+                's3_url': s3_url,
+                'chat_id': chat_id,
+                'timestamp': int(time.time())
+            }
 
+            # Send the job to the SQS queue
+            response = self.sqs_client.send_message(
+                QueueUrl=self.sqs_queue_url,
+                MessageBody=json.dumps(message)
+            )
 
+            logger.info(f"Job sent to SQS queue {self.sqs_queue_url}. Message ID: {response['MessageId']}")
+        except Exception as e:
+            logger.error(f"An error occurred while sending the job to SQS: {str(e)}")
+            raise RuntimeError(f"An error occurred while sending the job to SQS: {str(e)}")
 
-@app.route(f'/loadTest/', methods=['POST'])
-def load_test():
-    req = request.get_json()
-    bot.handle_message(req['message'])
-    return 'Ok'
+    def send_processing_message(self, chat_id):
+        """ Sends a message to the Telegram user - image is being processed. """
 
+        self.send_text(chat_id, "Your image is being processed. Please wait...")
 
-def get_prediction_results(prediction_id):
-    """ MongoDB connection """
+    def handle_message(self, msg):
+        logger.info(f'Incoming message: {msg}')
 
-    mongo_client = MongoClient(mongodb_uri)
-    logger.info(f"mongo_client is : {mongo_client}")
-    db = mongo_client['yolo5_db']
-    logger.info(f"db is : {prediction_id}")
-    predictions = db['predictions']
-    logger.info(f"prediction is : {predictions}")
+        if self.is_current_msg_photo(msg):
+            photo_path = self.download_user_photo(msg)
 
-    db.predictions.find({"prediction_id": "68908143-5b66-4f41-a02a-62773609ec4a"})
-    result = predictions.find_one({"prediction_id": prediction_id})  # Search by the result of prediction_id
-    if result:
-        logger.info(f"Found prediction: {result}")
-    else:
-        logger.error(f"Prediction with ID {prediction_id} not found.")
-    return result
+            # Upload the photo to S3
+            s3_url = self.upload_photo_to_s3(photo_path)
 
+            # Send a job to the SQS queue for processing
+            chat_id = msg['chat']['id']
+            if not chat_id:
+                logger.error("Chat ID not found in the message")
+                return
+            self.send_job_to_sqs(s3_url, chat_id)
 
-if __name__ == "__main__":
-    bot = ObjectDetectionBot(TELEGRAM_TOKEN, TELEGRAM_APP_URL, S3_BUCKET_NAME, SQS_QUEUE_URL)
-
-    app.run(host='0.0.0.0', port=8443)
+            # Inform the user that the image is being processed
+            self.send_processing_message(msg['chat']['id'])
+        else:
+            self.send_text(msg['chat']['id'], "Please send a photo to be processed.")
