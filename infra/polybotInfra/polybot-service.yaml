@@ -1,0 +1,25 @@
+apiVersion: v1
+
+kind: Service
+
+metadata:
+
+  name: polybot
+
+  namespace: default
+
+spec:
+
+  selector:
+
+    app: polybot
+
+  ports:
+
+    - protocol: TCP
+
+      port: 8443
+
+      targetPort: 8443
+
+  type: ClusterIP

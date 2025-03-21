@@ -53,7 +53,7 @@ def consume():
 
                 # Parse the job data from the message
                 job_data = json.loads(message)
-                img_name = job_data['s3_url'].split('/')[-1]  # חילוץ שם הקובץ מתוך ה-URL
+                img_name = job_data['s3_url'].split('/')[-1]
                 chat_id = job_data['chat_id']
                 original_img_path = img_name
 

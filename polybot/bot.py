@@ -19,9 +19,8 @@ class Bot:
         self.telegram_bot_client.remove_webhook()
         time.sleep(0.5)
 
-        CERTIFICATE_FILE_NAME = os.environ['CERTIFICATE_FILE_NAME']
         # set the webhook URL
-        self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60, certificate=open(CERTIFICATE_FILE_NAME, 'r'))
+        self.telegram_bot_client.set_webhook(url=f'{telegram_chat_url}/{token}/', timeout=60)
 
         logger.info(f'Telegram Bot information\n\n{self.telegram_bot_client.get_me()}')
 
@@ -66,9 +65,10 @@ class Bot:
 
         logger.info(f'Incoming message: {msg}')
         self.send_text(msg['chat']['id'], f'Your original message: {msg["text"]}')
+
 class ObjectDetectionBot(Bot):
 
-    def __init__(self, token, telegram_chat_url, s3_bucket_name, sqs_queue_url, aws_region="eu-central-1"):
+    def __init__(self, token, telegram_chat_url, s3_bucket_name, sqs_queue_url, aws_region="eu-north-1"):
         super().__init__(token, telegram_chat_url)
         # Initialize AWS clients
         self.s3_bucket_name = s3_bucket_name
