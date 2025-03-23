@@ -14,38 +14,38 @@ spec:
           - |
             echo "Waiting for MongoDB nodes to be ready..."
             for i in 0 1 2; do
-              until mongosh --host mongo-$i.mongo --eval "print('MongoDB is ready')" &>/dev/null; do
+              until mongosh --host mongo-$i --eval "print('MongoDB is ready')" &>/dev/null; do
                 echo "Waiting for mongo-$i..."
                 sleep 3
               done
             done
 
             echo "Checking if Replica Set is already initialized..."
-            INIT_STATUS=$(mongosh --host mongo-0.mongo --quiet --eval "rs.status().ok")
+            INIT_STATUS=$(mongosh --host mongo-0 --quiet --eval "rs.status().ok")
 
             if [[ "$INIT_STATUS" != "1" ]]; then
               echo "Initializing the Replica Set..."
-              mongosh --host mongo-0.mongo --eval "
+              mongosh --host mongo-0 --eval "
                 rs.initiate({
                   _id: 'rs0',
                   members: [
-                    { _id: 0, host: 'mongo-0.mongo:27017' },
-                    { _id: 1, host: 'mongo-1.mongo:27017' },
-                    { _id: 2, host: 'mongo-2.mongo:27017' }
+                    { _id: 0, host: 'mongo-0:27017' },
+                    { _id: 1, host: 'mongo-1:27017' },
+                    { _id: 2, host: 'mongo-2:27017' }
                   ]
                 });
               "
               echo "Replica Set initialized."
             else
               echo "Replica Set is already initialized. Ensuring correct configuration..."
-              mongosh --host mongo-0.mongo --eval "
+              mongosh --host mongo-0 --eval "
                 cfg = rs.conf();
                 members = cfg.members.map(m => m.host);
-                if (!members.includes('mongo-1.mongo:27017')) {
-                  cfg.members.push({ _id: 1, host: 'mongo-1.mongo:27017' });
+                if (!members.includes('mongo-1:27017')) {
+                  cfg.members.push({ _id: 1, host: 'mongo-1:27017' });
                 }
-                if (!members.includes('mongo-2.mongo:27017')) {
-                  cfg.members.push({ _id: 2, host: 'mongo-2.mongo:27017' });
+                if (!members.includes('mongo-2:27017')) {
+                  cfg.members.push({ _id: 2, host: 'mongo-2:27017' });
                 }
                 rs.reconfig(cfg, {force: true});
               "
@@ -53,7 +53,7 @@ spec:
             fi
 
             echo "Waiting for MongoDB to elect a PRIMARY..."
-            until mongosh --host mongo-0.mongo --eval "rs.status()" | grep -q 'PRIMARY'; do
+            until mongosh --host mongo-0 --eval "rs.status()" | grep -q 'PRIMARY'; do
               echo "Waiting for PRIMARY election..."
               sleep 3
             done
