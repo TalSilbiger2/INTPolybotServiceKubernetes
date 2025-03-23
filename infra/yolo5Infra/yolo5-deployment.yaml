@@ -32,7 +32,7 @@ spec:
 
         - name: yolo5
 
-          image: "docker.io/talsilbiger/yolo5k:latest"
+          image: "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/yolo5k:latest"
 
           ports:
 
