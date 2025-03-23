@@ -46,6 +46,7 @@ class Bot:
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
+
         with open(file_info.file_path, 'wb') as photo:
             photo.write(data)
 
