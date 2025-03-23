@@ -37,6 +37,4 @@ spec:
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db
-  volumes:
-  - name: mongo-data
-    emptyDir: {}  # Ephemeral storage (data will be lost when pod restarts)
+  volumeClaimTemplates: []  # No persistent volume claim is needed, and no volumes section should be present
