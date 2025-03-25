@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: polybot
-          image: docker.io/talsilbiger/polybotk:v1.1.1  # ✅ This will be updated automatically
+          image: docker.io/talsilbiger/polybotk:v2.2.2  # ✅ This will be updated automatically
           ports:
             - containerPort: 8443
           env:
