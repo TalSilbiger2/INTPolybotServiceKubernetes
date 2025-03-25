@@ -106,6 +106,8 @@ def consume():
                         'chat_id': chat_id
                     }
 
+                    logger.info(f"Try to save to Mongo")
+
                     # Save the result to MongoDB
                     predictions_collection.insert_one(prediction_summary)
                     response = requests.post(
@@ -113,6 +115,11 @@ def consume():
                         json={"predictionId": prediction_id},
                         verify=False
                     )
+
+                    logger.info(f"This is the results - TAL LOG - {polybot_url}/results")
+
+                    logger.info(f"Polybot /results response: {response.status_code} - {response.text}")
+
                     logger.info(f"Response: {response.status_code} - {response.text}")
                     logger.info(f"saved id {prediction_id} to mongo")
 

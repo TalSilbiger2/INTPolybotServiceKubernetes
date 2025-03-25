@@ -56,30 +56,32 @@ spec:
 
               value: "https://tal-polybot-route53.devops-int-college.com"
 
-            - name: MONGO_USER
+#            - name: MONGO_USER
 
-              valueFrom:
+#              valueFrom:
 
-                secretKeyRef:
+#                secretKeyRef:
 
-                  name: mongo-secret
+#                  name: mongo-secret
 
-                  key: username
+#                  key: username
 
-            - name: MONGO_PASSWORD
+#            - name: MONGO_PASSWORD
 
-              valueFrom:
+#              valueFrom:
 
-                secretKeyRef:
+#                secretKeyRef:
 
-                  name: mongo-secret
+#                  name: mongo-secret
 
-                  key: password
+#                  key: password
 
+#            - name: MONGODB_URI
+
+#              value: "mongodb://$(MONGO_USER):$(MONGO_PASSWORD)@mongo:27017/?authSource=admin"
             - name: MONGODB_URI
+              value: mongodb://mongo:27017
 
-              value: "mongodb://$(MONGO_USER):$(MONGO_PASSWORD)@mongo:27017/?authSource=admin"
+#      imagePullSecrets:
 
-      imagePullSecrets:
-
-        - name: dockerhub-secret
+#        - name: dockerhub-secret
