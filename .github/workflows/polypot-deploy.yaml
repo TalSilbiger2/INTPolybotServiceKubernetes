@@ -1,4 +1,4 @@
-name: Polybot deploy
+name: CI - Polybot
 
 on:
   push:
@@ -35,5 +35,4 @@ jobs:
         with:
           context: ./polybot
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:${{ github.sha }}   # Commit hash-based tag
-                ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:latest             # 'latest' tag for ease of use
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:latest
