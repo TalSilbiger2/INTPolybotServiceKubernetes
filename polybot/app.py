@@ -8,7 +8,7 @@ from bot import ObjectDetectionBot
 from loguru import logger
 
 # This will execute CI
-# I Want to check CD process :)
+# I Want to check CD process :) :)
 
 app = flask.Flask(__name__)
 
