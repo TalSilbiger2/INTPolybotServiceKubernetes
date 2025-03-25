@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd-image-updater.argoproj.io/image-list: talsilbiger/polybotk
     argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/talsilbiger.polybotk.update-strategy: v1.0.3
+    argocd-image-updater.argoproj.io/talsilbiger.polybotk.update-strategy: semver
     argocd-image-updater.argoproj.io/talsilbiger.polybotk.force-update: "true"
 spec:
   project: default
