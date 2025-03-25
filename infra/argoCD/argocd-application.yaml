@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: 'https://github.com/TalSilbiger2/INTPolybotServiceKubernetes.git'
     targetRevision: main
-    path: infra/polybotInfra
+    path: infra/
   destination:
     server: https://kubernetes.default.svc
     namespace: default
