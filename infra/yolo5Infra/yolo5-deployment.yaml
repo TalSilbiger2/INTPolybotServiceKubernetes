@@ -32,7 +32,7 @@ spec:
 
         - name: yolo5
 
-          image: "docker.io/talsilbiger/yolo5k:latest"
+          image: "docker.io/talsilbiger/yolo5k:v1.1.1"
 
           ports:
 
@@ -55,33 +55,3 @@ spec:
             - name: POLYBOT_URL
 
               value: "https://tal-polybot-route53.devops-int-college.com"
-
-#            - name: MONGO_USER
-
-#              valueFrom:
-
-#                secretKeyRef:
-
-#                  name: mongo-secret
-
-#                  key: username
-
-#            - name: MONGO_PASSWORD
-
-#              valueFrom:
-
-#                secretKeyRef:
-
-#                  name: mongo-secret
-
-#                  key: password
-
-#            - name: MONGODB_URI
-
-#              value: "mongodb://$(MONGO_USER):$(MONGO_PASSWORD)@mongo:27017/?authSource=admin"
-#            - name: MONGODB_URI
-#              value: mongodb://mongo:27017
-
-#      imagePullSecrets:
-
-#        - name: dockerhub-secret

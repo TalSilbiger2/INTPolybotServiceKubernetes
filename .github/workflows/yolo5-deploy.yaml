@@ -34,4 +34,4 @@ jobs:
         with:
           context: ./yolo5
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/yolo5k:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/yolo5k:v1.1.1

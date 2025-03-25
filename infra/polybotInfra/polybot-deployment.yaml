@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: polybot
-          image: docker.io/talsilbiger/polybotk:latest  # ✅ This will be updated automatically
+          image: docker.io/talsilbiger/polybotk:v1.1.1  # ✅ This will be updated automatically
           ports:
             - containerPort: 8443
           env:
@@ -25,17 +25,3 @@ spec:
               value: "tal-polybot-docker-bucket"
             - name: SQS_QUEUE_URL
               value: "https://sqs.eu-north-1.amazonaws.com/352708296901/tal-polybot-queue"
-#            - name: MONGO_USER
-#              valueFrom:
-#                secretKeyRef:
-#                  name: mongo-secret
-#                  key: username
-#            - name: MONGO_PASSWORD
-#              valueFrom:
-#                secretKeyRef:
-#                  name: mongo-secret
-#                  key: password
-            # - name: MONGODB_URI
-            #  value: mongodb://mongo:27017
-#      imagePullSecrets:
-#        - name: dockerhub-secret
