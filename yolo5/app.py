@@ -116,7 +116,7 @@ def consume():
                         verify=False
                     )
 
-                    logger.info(f"This is the results - TAL LOG - {polybot_url}/results")
+                    logger.info(f"This is the results - TAL LOG :) - {polybot_url}/results")
 
                     logger.info(f"Polybot /results response: {response.status_code} - {response.text}")
 
