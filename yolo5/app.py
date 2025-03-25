@@ -25,7 +25,7 @@ with open("data/coco128.yaml", "r") as stream:
     names = yaml.safe_load(stream)['names']
 
 # MongoDB connection
-mongo_client = MongoClient(mongodb_uri)
+mongo_client = MongoClient('mongodb://mongodb.default.svc.cluster.local:27017/?replicaSet=rs0')
 db = mongo_client['yolo5_db']
 predictions_collection = db['predictions']
 

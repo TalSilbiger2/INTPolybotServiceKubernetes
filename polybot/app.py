@@ -33,7 +33,7 @@ TELEGRAM_TOKEN = secrets['TELEGRAM_KEY']
 TELEGRAM_APP_URL = os.environ['TELEGRAM_APP_URL']
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
-mongodb_uri = os.environ['MONGODB_URI']
+#mongodb_uri = os.environ['MONGODB_URI']
 
 
 @app.route('/', methods=['GET'])
@@ -98,7 +98,7 @@ def load_test():
 
 def get_prediction_results(prediction_id):
     # MongoDB connection
-    mongo_client = MongoClient(mongodb_uri)
+    mongo_client = MongoClient('mongodb://mongodb.default.svc.cluster.local:27017/?replicaSet=rs0')
     logger.info(f"mongo_client is : {mongo_client}")
     db = mongo_client['yolo5_db']
     logger.info(f"db is : {prediction_id}")
