@@ -12,7 +12,6 @@ from loguru import logger
 # Environment variables
 images_bucket = os.environ['BUCKET_NAME']
 queue_name = os.environ['SQS_QUEUE_URL']
-#mongodb_uri = os.environ['MONGODB_URI']
 polybot_url = os.environ['POLYBOT_URL']
 region_name = os.environ['AWS_REGION']
 

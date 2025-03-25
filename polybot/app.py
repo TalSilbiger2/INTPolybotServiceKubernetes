@@ -33,7 +33,6 @@ TELEGRAM_TOKEN = secrets['TELEGRAM_KEY']
 TELEGRAM_APP_URL = os.environ['TELEGRAM_APP_URL']
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
-#mongodb_uri = os.environ['MONGODB_URI']
 
 
 @app.route('/', methods=['GET'])
