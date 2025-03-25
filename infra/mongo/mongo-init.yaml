@@ -7,13 +7,13 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-        - name: mongo-init
+        - name: mongodb-init
           image: mongo:5
-          command: ["sh", "-c"]
+          command: ["bash", "-c"]
           args:
             - |
               until mongosh --host mongodb-0.mongodb:27017 --eval "print('MongoDB is up')" >/dev/null 2>&1; do 
-                sleep 10
+                sleep 5
               done 
               mongosh --host mongodb-0.mongodb.default.svc.cluster.local --eval '
               rs.initiate({ 
@@ -24,3 +24,4 @@ spec:
                   { _id: 2, host: "mongodb-2.mongodb:27017", priority: 1 } 
                 ] 
               })'
+              echo "Replica set initialization completed."

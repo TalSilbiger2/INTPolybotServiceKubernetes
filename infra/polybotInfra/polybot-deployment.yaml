@@ -8,6 +8,9 @@ metadata:
 
   namespace: default
 
+  argocd-image-updater.argoproj.io/image-list: talsilbiger/polybotk
+  argocd-image-updater.argoproj.io/talsilbiger/polybotk.update-strategy: latest
+
 spec:
 
   replicas: 2
@@ -32,7 +35,7 @@ spec:
 
         - name: polybot
 
-          image: "docker.io/talsilbiger/polybotk:latest"
+          image: "docker.io/talsilbiger/polybotk:{{ .Values.image.tag }}"
 
           ports:
 
