@@ -12,6 +12,7 @@ from loguru import logger
 
 app = flask.Flask(__name__)
 
+# remove secret
 
 def get_secret(secret_name):
     """ Loading from secret manager """
