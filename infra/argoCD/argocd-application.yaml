@@ -6,19 +6,15 @@ metadata:
   annotations:
     argocd-image-updater.argoproj.io/image-list: |
       talsilbiger/polybotk
-      talsilbiger/yolo5k
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/talsilbiger.polybotk.update-strategy: semver
-    argocd-image-updater.argoproj.io/talsilbiger.yolo5k.update-strategy: semver
     argocd-image-updater.argoproj.io/talsilbiger.polybotk.force-update: "true"
-    argocd-image-updater.argoproj.io/talsilbiger.yolo5k.force-update: "true"
 spec:
   project: default
   source:
     repoURL: 'https://github.com/TalSilbiger2/INTPolybotServiceKubernetes.git'
     targetRevision: main
-    path: infra  # <-- Must include a kustomization.yaml here!
-    kustomize: {}
+    path: infra/polybotInfra  # Fixed path — no need for kustomization.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
