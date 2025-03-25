@@ -35,4 +35,5 @@ jobs:
         with:
           context: ./polybot
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:${{ github.sha }}   # Commit hash-based tag
+                ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:latest             # 'latest' tag for ease of use
