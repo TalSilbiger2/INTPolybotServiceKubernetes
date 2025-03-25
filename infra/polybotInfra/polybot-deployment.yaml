@@ -5,7 +5,7 @@ metadata:
   namespace: default
   annotations:
     argocd-image-updater.argoproj.io/image-list: "talsilbiger/polybotk"
-    argocd-image-updater.argoproj.io/talsilbiger/polybotk.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/update-strategy-talsilbiger-polybotk: "latest"
 spec:
   replicas: 2
   selector:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: polybot
-          image: "docker.io/talsilbiger/polybotk:latest"  # Use latest or dynamic tag here
+          image: "docker.io/talsilbiger/polybotk:latest"  # Use dynamic tag via CI/CD pipeline
           ports:
             - containerPort: 8443
           env:
