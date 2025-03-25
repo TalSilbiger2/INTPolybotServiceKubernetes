@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from bot import ObjectDetectionBot
 from loguru import logger
 
+# This will execute CI
 
 app = flask.Flask(__name__)
 
