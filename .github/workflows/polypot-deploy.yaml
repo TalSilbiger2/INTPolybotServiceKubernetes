@@ -1,4 +1,4 @@
-name: Polybot - Deploy
+name: Polybot-Deploy
 
 on:
   push:
