@@ -35,4 +35,4 @@ jobs:
         with:
           context: ./polybot
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/polybotk:v1.0.3
